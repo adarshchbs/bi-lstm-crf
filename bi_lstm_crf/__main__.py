@@ -1,3 +1,3 @@
-from .app.train import main
+from ..train import main
 
 main()

@@ -1,0 +1,9 @@
+[project]
+name = "bi_lstm_crf"
+version = "0.1.0"
+dependencies = [
+    "numpy>=2.1.2",
+    "pandas>=2.2.3",
+    "torch>=2.5.0",
+    "tqdm>=4.66.5",
+]

@@ -29,7 +29,9 @@ class WordsTagger:
             raise ValueError("sentences must be a list of sentence")
 
         try:
-            sent_tensor = np.asarray([self.preprocessor.sent_to_vector(s) for s in sentences])
+            sent_tensor = np.asarray(
+                [self.preprocessor.sent_to_vector(s) for s in sentences]
+            )
             sent_tensor = torch.from_numpy(sent_tensor).to(self.device)
             with torch.no_grad():
                 _, tags = self.model(sent_tensor)
@@ -54,26 +56,48 @@ class WordsTagger:
         def _tokens(sentence, ts):
             # begins: [(idx, label), ...]
             all_begin_tags = begin_tags + "O"
-            begins = [(idx, t[2:]) for idx, t in enumerate(ts) if t[0] in all_begin_tags]
             begins = [
-                         (idx, label)
-                         for idx, label in begins
-                         if ts[idx] != "O" or (idx > 0 and ts[idx - 1] != "O")
-                     ] + [(len(ts), "")]
+                (idx, t[2:]) for idx, t in enumerate(ts) if t[0] in all_begin_tags
+            ]
+            begins = [
+                (idx, label)
+                for idx, label in begins
+                if ts[idx] != "O" or (idx > 0 and ts[idx - 1] != "O")
+            ] + [(len(ts), "")]
 
-            tokens_ = [(sentence[s:e], label) for (s, label), (e, _) in zip(begins[:-1], begins[1:]) if label]
+            tokens_ = [
+                (sentence[s:e], label)
+                for (s, label), (e, _) in zip(begins[:-1], begins[1:])
+                if label
+            ]
             return [((t, tag) if tag else t) for t, tag in tokens_]
 
-        tokens_list = [_tokens(sentence, ts) for sentence, ts in zip(sentences, tags_list)]
+        tokens_list = [
+            _tokens(sentence, ts) for sentence, ts in zip(sentences, tags_list)
+        ]
         return tokens_list
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("sentence", type=str, help="the sentence to be predicted")
-    parser.add_argument('--model_dir', type=str, required=True, help="the model directory for model files")
-    parser.add_argument('--device', type=str, default=None,
-                        help='the training device: "cuda:0", "cpu:0". It will be auto-detected by default')
+    parser.add_argument(
+        "--sentence",
+        default="市领导到成都高新区进行考察",
+        type=str,
+        help="the sentence to be predicted",
+    )
+    parser.add_argument(
+        "--model_dir",
+        default="model_dir",
+        type=str,
+        help="the model directory for model files",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default=None,
+        help='the training device: "cuda:0", "cpu:0". It will be auto-detected by default',
+    )
 
     args = parser.parse_args()
 
